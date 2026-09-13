@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Indicadores | Monitor Macro Argentina & EE.UU.</title>
+<meta name="description" content="Monitor diario de indicadores económicos y financieros de Argentina y Estados Unidos.">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0b0f19">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Indicadores">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          darkBg: '#0b0f19',
+          cardBg: '#1e293b',
+          borderDark: '#334155',
+          accentBlue: '#38bdf8',
+          accentGreen: '#34d399',
+          accentAmber: '#fbbf24'
+        }
+      }
+    }
+  }
+</script>
+<style>
+  iframe { border-radius: 0.5rem; border: none; }
+  .tab-btn.active { background-color: #0ea5e9; color: #fff; border-color: #0ea5e9; }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+  ::-webkit-scrollbar { height: 8px; width: 8px; }
+  ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+</style>
+</head>
+<body class="bg-[#0b0f19] text-slate-100 font-sans antialiased min-h-screen p-4 md:p-6 max-w-6xl mx-auto">
+
+  <!-- Header -->
+  <header class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 pb-4 border-b border-slate-800 gap-4">
+    <div>
+      <h1 class="text-2xl md:text-3xl font-bold tracking-tight text-white flex items-center gap-2">
+        <span class="inline-block w-3 h-3 rounded-full bg-emerald-500 animate-pulse"></span>
+        Indicadores
+      </h1>
+      <p class="text-xs md:text-sm text-slate-400 mt-1">Monitor diario de variables económicas y financieras — Argentina & Estados Unidos</p>
+    </div>
+    <div class="flex items-center gap-3">
+      <span id="lastUpdate" class="text-xs text-slate-400 bg-slate-800/80 px-3 py-1.5 rounded-lg border border-slate-700">Actualizando...</span>
+      <button onclick="refreshAll()" class="text-xs bg-slate-700 hover:bg-slate-600 transition px-3 py-1.5 rounded-lg border border-slate-600 font-medium">
+        ↻ Refrescar
+      </button>
+    </div>
+  </header>
+
+  <!-- Tabs -->
+  <nav class="flex gap-2 mb-8 sticky top-0 z-10 bg-[#0b0f19]/95 backdrop-blur py-2 -mx-4 px-4 md:mx-0 md:px-0">
+    <button class="tab-btn active flex-1 md:flex-none text-sm font-semibold px-4 py-2.5 rounded-lg border border-slate-700 bg-slate-800/80 transition" data-tab="ar" onclick="showTab('ar')">
+      🇦🇷 Argentina
+    </button>
+    <button class="tab-btn flex-1 md:flex-none text-sm font-semibold px-4 py-2.5 rounded-lg border border-slate-700 bg-slate-800/80 transition" data-tab="us" onclick="showTab('us')">
+      🇺🇸 Estados Unidos
+    </button>
+  </nav>
+
+  <!-- ============================= ARGENTINA ============================= -->
+  <section id="tab-ar" class="tab-panel active">
+
+    <section class="mb-10">
+      <h2 class="text-xs font-bold tracking-wider uppercase text-slate-400 mb-3 flex items-center gap-2">
+        <span>💵</span> Cotizaciones del dólar
+      </h2>
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4" id="dolarGrid">
+        <div class="bg-[#1e293b] p-4 rounded-xl border border-slate-800 animate-pulse h-24"></div>
+        <div class="bg-[#1e293b] p-4 rounded-xl border border-slate-800 animate-pulse h-24"></div>
+        <div class="bg-[#1e293b] p-4 rounded-xl border border-slate-800 animate-pulse h-24"></div>
+        <div class="bg-[#1e293b] p-4 rounded-xl border border-slate-800 animate-pulse h-24"></div>
+      </div>
+      <p class="text-[11px] text-slate-500 mt-2">Fuente: <a href="https://dolarapi.com" target="_blank" class="underline hover:text-slate-300">DolarAPI</a> (agrega el mayorista y el precio tarjeta con el botón de abajo si te interesa).</p>
+    </section>
+
+    <section class="mb-10">
+      <h2 class="text-xs font-bold tracking-wider uppercase text-slate-400 mb-3 flex items-center gap-2">
+        <span>📊</span> Riesgo país e inflación
+      </h2>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4" id="argIndicesGrid">
+        <div class="bg-[#1e293b] p-4 rounded-xl border border-slate-800 animate-pulse h-32"></div>
+        <div class="bg-[#1e293b] p-4 rounded-xl border border-slate-800 animate-pulse h-32"></div>
+        <div class="bg-[#1e293b] p-4 rounded-xl border border-slate-800 animate-pulse h-32"></div>
+      </div>
+    </section>
+
+    <section class="mb-8">
+      <div class="mb-4">
+        <h2 class="text-sm font-bold tracking-wider uppercase text-sky-400 flex items-center gap-2">
+          <span>📌</span> Otras variables clave (referencia)
+        </h2>
+        <p class="text-xs text-slate-400 mt-0.5">No tienen una API pública confiable para mostrar en vivo todavía, pero acá tenés qué son, por qué importan y dónde consultarlas al toque.</p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="argRefGrid"></div>
+    </section>
+
+  </section>
+
+  <!-- ============================= ESTADOS UNIDOS ============================= -->
+  <section id="tab-us" class="tab-panel">
+
+    <section class="mb-12">
+      <div class="mb-4">
+        <h2 class="text-sm font-bold tracking-wider uppercase text-amber-400 flex items-center gap-2">
+          <span>0.</span> Volatilidad, oro y petróleo
+        </h2>
+        <p class="text-xs text-slate-400 mt-0.5">Termómetros rápidos del humor del mercado y de referencia para la economía real.</p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+        <!-- VIX -->
+        <div class="bg-[#1e293b] p-4 rounded-xl border border-slate-800 flex flex-col justify-between shadow-lg">
+          <div>
+            <div class="flex justify-between items-start mb-2">
+              <h3 class="font-semibold text-slate-100 text-sm md:text-base leading-snug">Índice VIX (volatilidad implícita del S&P 500)</h3>
+            </div>
+            <div class="flex items-center gap-2 mb-3">
+              <span class="text-xs font-mono bg-amber-950 text-amber-300 border border-amber-800 px-2 py-0.5 rounded font-semibold">VIXCLS</span>
+              <a href="https://fred.stlouisfed.org/series/VIXCLS" target="_blank" rel="noopener noreferrer" class="text-xs text-amber-400 hover:text-amber-300 underline font-medium flex items-center gap-1">Ver en FRED ↗</a>
+            </div>
+            <div class="w-full h-80 mb-3 bg-slate-900/50 rounded-lg overflow-hidden">
+              <iframe src="https://fred.stlouisfed.org/graph/graph-landing.php?g=1uQ8l&width=600&height=320&id=VIXCLS" scrolling="no" class="w-full h-full border-0" loading="lazy"></iframe>
+            </div>
+          </div>
+          <div class="text-xs text-slate-400 bg-slate-900/80 p-3 rounded-lg border border-slate-800/80 mt-auto leading-relaxed space-y-1">
+            <p><strong class="text-slate-200">Relevancia:</strong> conocido como el "índice del miedo". Mide la volatilidad esperada del S&amp;P 500 para los próximos 30 días implícita en el precio de las opciones.</p>
+            <p class="text-[11px]"><strong class="text-slate-300">Referencia de valores:</strong> &lt;15 calma/complacencia · 15–20 rango normal · 20–30 nerviosismo · 30–40 estrés de mercado · &gt;40 pánico (niveles de 2008 o marzo 2020).</p>
+          </div>
+        </div>
+
+        <!-- ORO -->
+        <div class="bg-[#1e293b] p-4 rounded-xl border border-slate-800 flex flex-col justify-between shadow-lg">
+          <div>
+            <div class="flex justify-between items-start mb-2">
+              <h3 class="font-semibold text-slate-100 text-sm md:text-base leading-snug">Oro (spot, USD por onza troy)</h3>
+            </div>
+            <div class="flex items-center gap-2 mb-3">
+              <span class="text-xs font-mono bg-amber-950 text-amber-300 border border-amber-800 px-2 py-0.5 rounded font-semibold">XAUUSD</span>
+              <a href="https://www.tradingview.com/symbols/OANDA-XAUUSD/" target="_blank" rel="noopener noreferrer" class="text-xs text-amber-400 hover:text-amber-300 underline font-medium flex items-center gap-1">Ver en TradingView ↗</a>
+            </div>
+            <div class="w-full h-80 mb-3 bg-slate-900/50 rounded-lg overflow-hidden flex items-center justify-center" id="goldWidgetWrap">
+              <div class="tradingview-widget-container w-full h-full">
+                <div class="tradingview-widget-container__widget"></div>
+                <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-mini-symbol-overview.js" async>
+                {
+                "symbol": "OANDA:XAUUSD",
+                "width": "100%",
+                "height": "100%",
+                "locale": "es",
+                "dateRange": "12M",
+                "colorTheme": "dark",
+                "isTransparent": true,
+                "autosize": true,
+                "largeChartUrl": ""
+                }
+                </script>
+              </div>
+            </div>
+          </div>
+          <div class="text-xs text-slate-400 bg-slate-900/80 p-3 rounded-lg border border-slate-800/80 mt-auto leading-relaxed">
+            <strong class="text-slate-200">Relevancia:</strong> activo refugio por excelencia. Suele subir con mayor incertidumbre geopolítica, tasas reales negativas o expectativas de inflación, y funciona como cobertura frente a la debilidad del dólar.
+          </div>
+        </div>
+
+        <!-- WTI -->
+        <div class="bg-[#1e293b] p-4 rounded-xl border border-slate-800 flex flex-col justify-between shadow-lg">
+          <div>
+            <div class="flex justify-between items-start mb-2">
+              <h3 class="font-semibold text-slate-100 text-sm md:text-base leading-snug">Petróleo WTI (Cushing, Oklahoma)</h3>
+            </div>
+            <div class="flex items-center gap-2 mb-3">
+              <span class="text-xs font-mono bg-amber-950 text-amber-300 border border-amber-800 px-2 py-0.5 rounded font-semibold">DCOILWTICO</span>
+              <a href="https://fred.stlouisfed.org/series/DCOILWTICO" target="_blank" rel="noopener noreferrer" class="text-xs text-amber-400 hover:text-amber-300 underline font-medium flex items-center gap-1">Ver en FRED ↗</a>
+            </div>
+            <div class="w-full h-80 mb-3 bg-slate-900/50 rounded-lg overflow-hidden">
+              <iframe src="https://fred.stlouisfed.org/graph/graph-landing.php?g=1uQaZ&width=600&height=320&id=DCOILWTICO" scrolling="no" class="w-full h-full border-0" loading="lazy"></iframe>
+            </div>
+          </div>
+          <div class="text-xs text-slate-400 bg-slate-900/80 p-3 rounded-lg border border-slate-800/80 mt-auto leading-relaxed">
+            <strong class="text-slate-200">Relevancia:</strong> principal benchmark de precio del petróleo en EE.UU. Afecta directamente la nafta, el costo de transporte y es un componente clave de la inflación.
+          </div>
+        </div>
+
+        <!-- BRENT -->
+        <div class="bg-[#1e293b] p-4 rounded-xl border border-slate-800 flex flex-col justify-between shadow-lg">
+          <div>
+            <div class="flex justify-between items-start mb-2">
+              <h3 class="font-semibold text-slate-100 text-sm md:text-base leading-snug">Petróleo Brent (referencia global)</h3>
+            </div>
+            <div class="flex items-center gap-2 mb-3">
+              <span class="text-xs font-mono bg-amber-950 text-amber-300 border border-amber-800 px-2 py-0.5 rounded font-semibold">DCOILBRENTEU</span>
+              <a href="https://fred.stlouisfed.org/series/DCOILBRENTEU" target="_blank" rel="noopener noreferrer" class="text-xs text-amber-400 hover:text-amber-300 underline font-medium flex items-center gap-1">Ver en FRED ↗</a>
+            </div>
+            <div class="w-full h-80 mb-3 bg-slate-900/50 rounded-lg overflow-hidden">
+              <iframe src="https://fred.stlouisfed.org/graph/graph-landing.php?g=1uQb3&width=600&height=320&id=DCOILBRENTEU" scrolling="no" class="w-full h-full border-0" loading="lazy"></iframe>
+            </div>
+          </div>
+          <div class="text-xs text-slate-400 bg-slate-900/80 p-3 rounded-lg border border-slate-800/80 mt-auto leading-relaxed">
+            <strong class="text-slate-200">Relevancia:</strong> benchmark de referencia para más de dos tercios del petróleo comercializado en el mundo (Europa, África, Medio Oriente y buena parte de Sudamérica, incluida la Argentina).
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <section class="mb-12">
+      <div class="mb-4">
+        <h2 class="text-sm font-bold tracking-wider uppercase text-emerald-400 flex items-center gap-2">
+          <span>0.1</span> Tasa libre de riesgo e inflación
+        </h2>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+        <!-- 10Y -->
+        <div class="bg-[#1e293b] p-4 rounded-xl border border-slate-800 flex flex-col justify-between shadow-lg">
+          <div>
+            <div class="flex justify-between items-start mb-2">
+              <h3 class="font-semibold text-slate-100 text-sm md:text-base leading-snug">Tasa del Tesoro a 10 años (proxy de tasa libre de riesgo)</h3>
+            </div>
+            <div class="flex items-center gap-2 mb-3">
+              <span class="text-xs font-mono bg-emerald-950 text-emerald-300 border border-emerald-800 px-2 py-0.5 rounded font-semibold">DGS10</span>
+              <a href="https://fred.stlouisfed.org/series/DGS10" target="_blank" rel="noopener noreferrer" class="text-xs text-emerald-400 hover:text-emerald-300 underline font-medium flex items-center gap-1">Ver en FRED ↗</a>
+            </div>
+            <div class="w-full h-80 mb-3 bg-slate-900/50 rounded-lg overflow-hidden">
+              <iframe src="https://fred.stlouisfed.org/graph/graph-landing.php?g=1uQbc&width=600&height=320&id=DGS10" scrolling="no" class="w-full h-full border-0" loading="lazy"></iframe>
+            </div>
+          </div>
+          <div class="text-xs text-slate-400 bg-slate-900/80 p-3 rounded-lg border border-slate-800/80 mt-auto leading-relaxed">
+            <strong class="text-slate-200">Relevancia:</strong> al estar respaldada por el Tesoro de EE.UU., se usa como aproximación práctica de la "tasa libre de riesgo" para descontar flujos de caja y valuar activos en todo el mundo.
+          </div>
+        </div>
+
+        <!-- CPI -->
+        <div class="bg-[#1e293b] p-4 rounded-xl border border-slate-800 flex flex-col justify-between shadow-lg">
+          <div>
+            <div class="flex justify-between items-start mb-2">
+              <h3 class="font-semibold text-slate-100 text-sm md:text-base leading-snug">Inflación (CPI, índice de precios al consumidor)</h3>
+            </div>
+            <div class="flex items-center gap-2 mb-3">
+              <span class="text-xs font-mono bg-emerald-950 text-emerald-300 border border-emerald-800 px-2 py-0.5 rounded font-semibold">CPIAUCSL</span>
+              <a href="https://fred.stlouisfed.org/series/CPIAUCSL" target="_blank" rel="noopener noreferrer" class="text-xs text-emerald-400 hover:text-emerald-300 underline font-medium flex items-center gap-1">Ver en FRED ↗</a>
+            </div>
+            <div class="w-full h-80 mb-3 bg-slate-900/50 rounded-lg overflow-hidden">
+              <iframe src="https://fred.stlouisfed.org/graph/graph-landing.php?g=1uQbk&width=600&height=320&id=CPIAUCSL" scrolling="no" class="w-full h-full border-0" loading="lazy"></iframe>
+            </div>
+          </div>
+          <div class="text-xs text-slate-400 bg-slate-900/80 p-3 rounded-lg border border-slate-800/80 mt-auto leading-relaxed">
+            <strong class="text-slate-200">Relevancia:</strong> la referencia oficial de inflación de la Fed. Su evolución interanual condiciona directamente las decisiones de tasas de interés de la Reserva Federal.
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <section class="mb-12">
+      <div class="mb-4">
+        <h2 class="text-sm font-bold tracking-wider uppercase text-sky-400 flex items-center gap-2">
+          <span>1.</span> Curva de Rendimientos (Indicadores Líderes)
+        </h2>
+        <p class="text-xs text-slate-400 mt-0.5">Spreads del Tesoro estadounidense utilizados como señales de alerta temprana ante posibles desaceleraciones y recesiones.</p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+        <div class="bg-[#1e293b] p-4 rounded-xl border border-slate-800 flex flex-col justify-between shadow-lg">
+          <div>
+            <div class="flex justify-between items-start mb-2">
+              <h3 class="font-semibold text-slate-100 text-sm md:text-base leading-snug">Bono del Tesoro a 10 años con vencimiento constante menos bono del Tesoro a 3 meses con vencimiento constante</h3>
+            </div>
+            <div class="flex items-center gap-2 mb-3">
+              <span class="text-xs font-mono bg-sky-950 text-sky-300 border border-sky-800 px-2 py-0.5 rounded font-semibold">T10Y3M</span>
+              <a href="https://fred.stlouisfed.org/series/T10Y3M" target="_blank" rel="noopener noreferrer" class="text-xs text-sky-400 hover:text-sky-300 underline font-medium flex items-center gap-1">Ver en FRED ↗</a>
+            </div>
+            <div class="w-full h-80 mb-3 bg-slate-900/50 rounded-lg overflow-hidden">
+              <iframe src="https://fred.stlouisfed.org/graph/graph-landing.php?g=1uQ8l&width=600&height=320" scrolling="no" class="w-full h-full border-0" loading="lazy"></iframe>
+            </div>
+          </div>
+          <div class="text-xs text-slate-400 bg-slate-900/80 p-3 rounded-lg border border-slate-800/80 mt-auto leading-relaxed">
+            <strong class="text-slate-200">Relevancia:</strong> Históricamente el spread más confiable (solo 1 falso positivo en 1966). El punto crítico a vigilar es el desfase de 3 a 7 meses posterior a su desinversión hacia terreno positivo.
+          </div>
+        </div>
+
+        <div class="bg-[#1e293b] p-4 rounded-xl border border-slate-800 flex flex-col justify-between shadow-lg">
+          <div>
+            <div class="flex justify-between items-start mb-2">
+              <h3 class="font-semibold text-slate-100 text-sm md:text-base leading-snug">Bono del Tesoro a 10 años con vencimiento constante menos bono del Tesoro a 2 años con vencimiento constante</h3>
+            </div>
+            <div class="flex items-center gap-2 mb-3">
+              <span class="text-xs font-mono bg-sky-950 text-sky-300 border border-sky-800 px-2 py-0.5 rounded font-semibold">T10Y2YM</span>
+              <a href="https://fred.stlouisfed.org/series/T10Y2YM" target="_blank" rel="noopener noreferrer" class="text-xs text-sky-400 hover:text-sky-300 underline font-medium flex items-center gap-1">Ver en FRED ↗</a>
+            </div>
+            <div class="w-full h-80 mb-3 bg-slate-900/50 rounded-lg overflow-hidden">
+              <iframe src="https://fred.stlouisfed.org/graph/graph-landing.php?g=1uQ8x&width=600&height=320" scrolling="no" class="w-full h-full border-0" loading="lazy"></iframe>
+            </div>
+          </div>
+          <div class="text-xs text-slate-400 bg-slate-900/80 p-3 rounded-lg border border-slate-800/80 mt-auto leading-relaxed">
+            <strong class="text-slate-200">Relevancia:</strong> El spread más monitoreado en los mercados financieros. Refleja las expectativas de tasas de política monetaria a mediano plazo frente al crecimiento tendencial de largo plazo.
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <section class="mb-12">
+      <div class="mb-4">
+        <h2 class="text-sm font-bold tracking-wider uppercase text-emerald-400 flex items-center gap-2">
+          <span>2.</span> Indicadores Coincidentes del NBER (Actividad Real Agregada)
+        </h2>
+        <p class="text-xs text-slate-400 mt-0.5">Series mensuales que el Comité del NBER evalúa prioritariamente para fechar expansiones y recesiones.</p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+        <div class="bg-[#1e293b] p-4 rounded-xl border border-slate-800 flex flex-col justify-between shadow-lg">
+          <div>
+            <div class="flex justify-between items-start mb-2">
+              <h3 class="font-semibold text-slate-100 text-sm md:text-base leading-snug">Ingresos personales reales excluyendo ingresos por transferencias corrientes</h3>
+            </div>
+            <div class="flex items-center gap-2 mb-3">
+              <span class="text-xs font-mono bg-emerald-950 text-emerald-300 border border-emerald-800 px-2 py-0.5 rounded font-semibold">W875RX1</span>
+              <a href="https://fred.stlouisfed.org/series/W875RX1" target="_blank" rel="noopener noreferrer" class="text-xs text-emerald-400 hover:text-emerald-300 underline font-medium flex items-center gap-1">Ver en FRED ↗</a>
+            </div>
+            <div class="w-full h-80 mb-3 bg-slate-900/50 rounded-lg overflow-hidden">
+              <iframe src="https://fred.stlouisfed.org/graph/graph-landing.php?g=1uQ96&width=600&height=320" scrolling="no" class="w-full h-full border-0" loading="lazy"></iframe>
+            </div>
+          </div>
+          <div class="text-xs text-slate-400 bg-slate-900/80 p-3 rounded-lg border border-slate-800/80 mt-auto leading-relaxed">
+            <strong class="text-slate-200">Relevancia:</strong> Una de las dos métricas de mayor ponderación para el NBER. Mide el poder de compra real derivado de la actividad productiva sin distorsiones por subsidios estatales.
+          </div>
+        </div>
+
+        <div class="bg-[#1e293b] p-4 rounded-xl border border-slate-800 flex flex-col justify-between shadow-lg">
+          <div>
+            <div class="flex justify-between items-start mb-2">
+              <h3 class="font-semibold text-slate-100 text-sm md:text-base leading-snug">Todos los empleados, total no agrícola</h3>
+            </div>
+            <div class="flex items-center gap-2 mb-3">
+              <span class="text-xs font-mono bg-emerald-950 text-emerald-300 border border-emerald-800 px-2 py-0.5 rounded font-semibold">PAYEMS</span>
+              <a href="https://fred.stlouisfed.org/series/PAYEMS" target="_blank" rel="noopener noreferrer" class="text-xs text-emerald-400 hover:text-emerald-300 underline font-medium flex items-center gap-1">Ver en FRED ↗</a>
+            </div>
+            <div class="w-full h-80 mb-3 bg-slate-900/50 rounded-lg overflow-hidden">
+              <iframe src="https://fred.stlouisfed.org/graph/graph-landing.php?g=1uQ9c&width=600&height=320" scrolling="no" class="w-full h-full border-0" loading="lazy"></iframe>
+            </div>
+          </div>
+          <div class="text-xs text-slate-400 bg-slate-900/80 p-3 rounded-lg border border-slate-800/80 mt-auto leading-relaxed">
+            <strong class="text-slate-200">Relevancia:</strong> Principal termómetro del empleo formal corporativo. Su aplanamiento o caída marca comúnmente el pico de la actividad económica antes de una contracción.
+          </div>
+        </div>
+
+        <div class="bg-[#1e293b] p-4 rounded-xl border border-slate-800 flex flex-col justify-between shadow-lg">
+          <div>
+            <div class="flex justify-between items-start mb-2">
+              <h3 class="font-semibold text-slate-100 text-sm md:text-base leading-snug">Ventas minoristas: Comercio minorista y servicios de alimentación</h3>
+            </div>
+            <div class="flex items-center gap-2 mb-3">
+              <span class="text-xs font-mono bg-emerald-950 text-emerald-300 border border-emerald-800 px-2 py-0.5 rounded font-semibold">MRTSSM44X72USS</span>
+              <a href="https://fred.stlouisfed.org/series/MRTSSM44X72USS" target="_blank" rel="noopener noreferrer" class="text-xs text-emerald-400 hover:text-emerald-300 underline font-medium flex items-center gap-1">Ver en FRED ↗</a>
+            </div>
+            <div class="w-full h-80 mb-3 bg-slate-900/50 rounded-lg overflow-hidden">
+              <iframe src="https://fred.stlouisfed.org/graph/graph-landing.php?g=1uQ9k&width=600&height=320" scrolling="no" class="w-full h-full border-0" loading="lazy"></iframe>
+            </div>
+          </div>
+          <div class="text-xs text-slate-400 bg-slate-900/80 p-3 rounded-lg border border-slate-800/80 mt-auto leading-relaxed">
+            <strong class="text-slate-200">Relevancia:</strong> Reflejo directo del gasto de los hogares (el consumo representa ~70% del PIB). Evalúa la resiliencia de la demanda ante condiciones financieras restrictivas.
+          </div>
+        </div>
+
+        <div class="bg-[#1e293b] p-4 rounded-xl border border-slate-800 flex flex-col justify-between shadow-lg">
+          <div>
+            <div class="flex justify-between items-start mb-2">
+              <h3 class="font-semibold text-slate-100 text-sm md:text-base leading-snug">Producción industrial: Índice total</h3>
+            </div>
+            <div class="flex items-center gap-2 mb-3">
+              <span class="text-xs font-mono bg-emerald-950 text-emerald-300 border border-emerald-800 px-2 py-0.5 rounded font-semibold">INDPRO</span>
+              <a href="https://fred.stlouisfed.org/series/INDPRO" target="_blank" rel="noopener noreferrer" class="text-xs text-emerald-400 hover:text-emerald-300 underline font-medium flex items-center gap-1">Ver en FRED ↗</a>
+            </div>
+            <div class="w-full h-80 mb-3 bg-slate-900/50 rounded-lg overflow-hidden">
+              <iframe src="https://fred.stlouisfed.org/graph/graph-landing.php?g=1uQ9m&width=600&height=320" scrolling="no" class="w-full h-full border-0" loading="lazy"></iframe>
+            </div>
+          </div>
+          <div class="text-xs text-slate-400 bg-slate-900/80 p-3 rounded-lg border border-slate-800/80 mt-auto leading-relaxed">
+            <strong class="text-slate-200">Relevancia:</strong> Sector altamente sensible al ciclo crediticio y tasas de interés. Un comportamiento lateral o volátil anticipa la pérdida de dinamismo en el sector manufacturero y de servicios.
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <section class="mb-8">
+      <div class="mb-4">
+        <h2 class="text-sm font-bold tracking-wider uppercase text-amber-400 flex items-center gap-2">
+          <span>3.</span> Indicadores de Empleo y Confirmación
+        </h2>
+        <p class="text-xs text-slate-400 mt-0.5">Seguimiento de la encuesta de hogares y tasa de desempleo para verificar puntos de inflexión cíclicos.</p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+        <div class="bg-[#1e293b] p-4 rounded-xl border border-slate-800 flex flex-col justify-between shadow-lg">
+          <div>
+            <div class="flex justify-between items-start mb-2">
+              <h3 class="font-semibold text-slate-100 text-sm md:text-base leading-snug">Nivel de empleo</h3>
+            </div>
+            <div class="flex items-center gap-2 mb-3">
+              <span class="text-xs font-mono bg-amber-950 text-amber-300 border border-amber-800 px-2 py-0.5 rounded font-semibold">CE16OV</span>
+              <a href="https://fred.stlouisfed.org/series/CE16OV" target="_blank" rel="noopener noreferrer" class="text-xs text-amber-400 hover:text-amber-300 underline font-medium flex items-center gap-1">Ver en FRED ↗</a>
+            </div>
+            <div class="w-full h-80 mb-3 bg-slate-900/50 rounded-lg overflow-hidden">
+              <iframe src="https://fred.stlouisfed.org/graph/graph-landing.php?g=1uQ9q&width=600&height=320" scrolling="no" class="w-full h-full border-0" loading="lazy"></iframe>
+            </div>
+          </div>
+          <div class="text-xs text-slate-400 bg-slate-900/80 p-3 rounded-lg border border-slate-800/80 mt-auto leading-relaxed">
+            <strong class="text-slate-200">Relevancia:</strong> Datos provenientes de la encuesta a hogares. Permite identificar estancamientos en el número total de personas empleadas previo al inicio de una contracción formal.
+          </div>
+        </div>
+
+        <div class="bg-[#1e293b] p-4 rounded-xl border border-slate-800 flex flex-col justify-between shadow-lg">
+          <div>
+            <div class="flex justify-between items-start mb-2">
+              <h3 class="font-semibold text-slate-100 text-sm md:text-base leading-snug">Tasa de desempleo</h3>
+            </div>
+            <div class="flex items-center gap-2 mb-3">
+              <span class="text-xs font-mono bg-amber-950 text-amber-300 border border-amber-800 px-2 py-0.5 rounded font-semibold">UNRATE</span>
+              <a href="https://fred.stlouisfed.org/series/UNRATE" target="_blank" rel="noopener noreferrer" class="text-xs text-amber-400 hover:text-amber-300 underline font-medium flex items-center gap-1">Ver en FRED ↗</a>
+            </div>
+            <div class="w-full h-80 mb-3 bg-slate-900/50 rounded-lg overflow-hidden">
+              <iframe src="https://fred.stlouisfed.org/graph/graph-landing.php?g=1uQ9u&width=600&height=320" scrolling="no" class="w-full h-full border-0" loading="lazy"></iframe>
+            </div>
+          </div>
+          <div class="text-xs text-slate-400 bg-slate-900/80 p-3 rounded-lg border border-slate-800/80 mt-auto leading-relaxed">
+            <strong class="text-slate-200">Relevancia:</strong> Indicador de confirmación rezagado. Un incremento sostenido activa reglas empíricas de recesión (como la regla de Sahm), confirmando deterioro en el mercado de trabajo.
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+  </section>
+
+  <footer class="text-center text-[11px] text-slate-600 mt-10 pb-4">
+    Hecho por Exe · los datos se muestran con fines informativos, no constituyen recomendación de inversión.
+  </footer>
+
+<script>
+  // ---------- Tabs ----------
+  function showTab(tab) {
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('tab-' + tab).classList.add('active');
+    document.querySelector('.tab-btn[data-tab="' + tab + '"]').classList.add('active');
+    try { localStorage.setItem('indicadores_tab', tab); } catch(e) {}
+  }
+  try {
+    const saved = localStorage.getItem('indicadores_tab');
+    if (saved) showTab(saved);
+  } catch(e) {}
+
+  // ---------- Referencia (sin datos en vivo) ----------
+  const refCards = [
+    {
+      titulo: 'Reservas Internacionales del BCRA',
+      badge: 'Reservas',
+      que: 'Stock total de divisas brutas que administra el Banco Central, más el cálculo privado de reservas netas (descontando pasivos como swaps y encajes).',
+      importa: 'Evalúa la solvencia externa del país y la capacidad de intervenir en el mercado cambiario o pagar deuda en moneda extranjera.',
+      link: 'https://www.bcra.gob.ar/PublicacionesEstadisticas/Principales_variables.asp',
+      linkTxt: 'Ver en BCRA ↗'
+    },
+    {
+      titulo: 'Tasas: BADLAR, TAMAR y Tasa de Política Monetaria',
+      badge: 'Tasas',
+      que: 'BADLAR: tasa de depósitos privados mayores a $1M. TAMAR: tasa de plazos fijos mayoristas ($1.000M+, 30-35 días). Tasa de política monetaria: referencia que fija el BCRA.',
+      importa: 'Determinan el piso de remuneración del peso y el costo del crédito; son el benchmark de instrumentos a tasa variable como el TMG28.',
+      link: 'https://www.bcra.gob.ar/PublicacionesEstadisticas/Principales_variables.asp',
+      linkTxt: 'Ver en BCRA ↗'
+    },
+    {
+      titulo: 'Riesgo País futuro y REM (expectativas de mercado)',
+      badge: 'REM',
+      que: 'El Relevamiento de Expectativas de Mercado (REM) del BCRA encuesta a más de 40 consultoras y bancos sobre inflación, tipo de cambio y PBI proyectados a 12 meses.',
+      importa: 'Permite comparar lo que "espera el mercado" contra los datos reales, y anticipar si las tasas en pesos ofrecen rendimiento real positivo.',
+      link: 'https://www.bcra.gob.ar/PublicacionesEstadisticas/Relevamiento_Expectativas_de_Mercado.asp',
+      linkTxt: 'Ver REM en BCRA ↗'
+    },
+    {
+      titulo: 'Actividad económica: EMAE, ISAC e IPI',
+      badge: 'Actividad',
+      que: 'EMAE: proxy mensual del PBI (INDEC). ISAC: indicador de la construcción (cemento, hierro, asfalto). IPI: producción industrial manufacturera.',
+      importa: 'Se publican con 30-60 días de rezago pero son la referencia oficial del pulso real de la economía, por sector y en general.',
+      link: 'https://www.indec.gob.ar/indec/web/Institucional-Indec-InformacionDeArchivo-1',
+      linkTxt: 'Ver en INDEC ↗'
+    }
+  ];
+
+  function renderRefCards() {
+    const grid = document.getElementById('argRefGrid');
+    grid.innerHTML = refCards.map(c => `
+      <div class="bg-[#1e293b] p-4 rounded-xl border border-slate-800 flex flex-col justify-between shadow-lg">
+        <div>
+          <div class="flex justify-between items-start mb-2 gap-2">
+            <h3 class="font-semibold text-slate-100 text-sm md:text-base leading-snug">${c.titulo}</h3>
+          </div>
+          <div class="flex items-center gap-2 mb-3">
+            <span class="text-xs font-mono bg-sky-950 text-sky-300 border border-sky-800 px-2 py-0.5 rounded font-semibold">${c.badge}</span>
+            <a href="${c.link}" target="_blank" rel="noopener noreferrer" class="text-xs text-sky-400 hover:text-sky-300 underline font-medium flex items-center gap-1">${c.linkTxt}</a>
+          </div>
+          <p class="text-xs text-slate-300 leading-relaxed mb-2"><strong class="text-slate-200">Qué mide:</strong> ${c.que}</p>
+        </div>
+        <div class="text-xs text-slate-400 bg-slate-900/80 p-3 rounded-lg border border-slate-800/80 mt-auto leading-relaxed">
+          <strong class="text-slate-200">Por qué importa:</strong> ${c.importa}
+        </div>
+      </div>
+    `).join('');
+  }
+  renderRefCards();
+
+  // ---------- Dólares (DolarAPI) ----------
+  async function fetchDolarRates() {
+    const grid = document.getElementById('dolarGrid');
+    try {
+      const res = await fetch('https://dolarapi.com/v1/dolares');
+      if (!res.ok) throw new Error('Error al consultar DolarApi');
+      const data = await res.json();
+      const filtered = data.filter(d => ['oficial', 'blue', 'bolsa', 'contadoconliqui'].includes(d.casa));
+      const labels = { oficial: 'Dólar Oficial', blue: 'Dólar Blue', bolsa: 'Dólar MEP', contadoconliqui: 'Dólar CCL' };
+
+      grid.innerHTML = filtered.map(d => `
+        <div class="bg-[#1e293b] p-4 rounded-xl border border-slate-800 shadow hover:border-slate-700 transition flex flex-col justify-between">
+          <div class="flex justify-between items-center mb-1">
+            <span class="text-xs font-semibold text-slate-400 uppercase">${labels[d.casa] || d.nombre}</span>
+            <span class="text-[10px] text-slate-500 font-mono">${new Date(d.fechaActualizacion).toLocaleTimeString('es-AR', {hour:'2-digit', minute:'2-digit'})}</span>
+          </div>
+          <div class="flex items-baseline justify-between mt-2">
+            <div>
+              <span class="text-[10px] text-slate-500 block uppercase font-medium">Compra</span>
+              <span class="text-base font-semibold text-slate-300 font-mono">$${Number(d.compra).toLocaleString('es-AR')}</span>
+            </div>
+            <div class="text-right">
+              <span class="text-[10px] text-slate-500 block uppercase font-medium">Venta</span>
+              <span class="text-lg font-bold text-emerald-400 font-mono">$${Number(d.venta).toLocaleString('es-AR')}</span>
+            </div>
+          </div>
+        </div>
+      `).join('');
+      return true;
+    } catch (err) {
+      console.error(err);
+      grid.innerHTML = `<div class="col-span-2 md:col-span-4 text-xs text-red-400 bg-red-950/40 border border-red-900 rounded-xl p-4">No se pudieron cargar las cotizaciones del dólar en este momento.</div>`;
+      return false;
+    }
+  }
+
+  // ---------- Riesgo país + inflación (ArgentinaDatos) ----------
+  function indexCard(label, badge, value, sub, link) {
+    return `
+      <div class="bg-[#1e293b] p-4 rounded-xl border border-slate-800 shadow flex flex-col justify-between">
+        <div class="flex justify-between items-start mb-2">
+          <span class="text-xs font-semibold text-slate-400 uppercase">${label}</span>
+          <span class="text-xs font-mono bg-sky-950 text-sky-300 border border-sky-800 px-2 py-0.5 rounded font-semibold">${badge}</span>
+        </div>
+        <div class="text-2xl font-bold text-white font-mono mb-1">${value}</div>
+        <p class="text-[11px] text-slate-400 leading-snug">${sub}</p>
+        ${link ? `<a href="${link}" target="_blank" class="text-[11px] text-sky-400 hover:text-sky-300 underline mt-2 inline-block">Más info ↗</a>` : ''}
+      </div>
+    `;
+  }
+
+  async function fetchArgIndices() {
+    const grid = document.getElementById('argIndicesGrid');
+    const cards = [];
+
+    // Riesgo país
+    try {
+      const res = await fetch('https://api.argentinadatos.com/v1/finanzas/indices/riesgo-pais/ultimo');
+      const d = await res.json();
+      cards.push(indexCard(
+        'Riesgo país (EMBI+)',
+        'pb',
+        Number(d.valor).toLocaleString('es-AR'),
+        `Al ${new Date(d.fecha + 'T00:00:00').toLocaleDateString('es-AR')}. Spread sobre bonos del Tesoro de EE.UU. en USD.`,
+        'https://www.rava.com/perfil/riesgo-pais'
+      ));
+    } catch (e) {
+      cards.push(`<div class="bg-[#1e293b] p-4 rounded-xl border border-slate-800 text-xs text-red-400">Riesgo país: sin datos por ahora.</div>`);
+    }
+
+    // Inflación mensual + interanual (calculada con la serie mensual)
+    try {
+      const res = await fetch('https://api.argentinadatos.com/v1/finanzas/indices/inflacion');
+      const serie = await res.json();
+      const ultimo = serie[serie.length - 1];
+      const fecha = new Date(ultimo.fecha + 'T00:00:00').toLocaleDateString('es-AR', {month: 'long', year: 'numeric'});
+      cards.push(indexCard(
+        'Inflación mensual (IPC)',
+        '%',
+        `${ultimo.valor.toFixed(1)}%`,
+        `${fecha}. Fuente: INDEC.`,
+        'https://www.indec.gob.ar/indec/web/Nivel4-Tema-3-5-31'
+      ));
+
+      if (serie.length >= 12) {
+        const ultimos12 = serie.slice(-12);
+        const interanual = (ultimos12.reduce((acc, m) => acc * (1 + m.valor / 100), 1) - 1) * 100;
+        cards.push(indexCard(
+          'Inflación interanual (12 meses)',
+          '%',
+          `${interanual.toFixed(1)}%`,
+          `Acumulado de los últimos 12 meses a ${fecha}.`,
+          'https://www.indec.gob.ar/indec/web/Nivel4-Tema-3-5-31'
+        ));
+      }
+    } catch (e) {
+      cards.push(`<div class="bg-[#1e293b] p-4 rounded-xl border border-slate-800 text-xs text-red-400">Inflación: sin datos por ahora.</div>`);
+    }
+
+    grid.innerHTML = cards.join('');
+  }
+
+  async function refreshAll() {
+    const lastUpdate = document.getElementById('lastUpdate');
+    lastUpdate.textContent = 'Actualizando...';
+    await Promise.all([fetchDolarRates(), fetchArgIndices()]);
+    lastUpdate.textContent = `Actualizado ${new Date().toLocaleTimeString('es-AR')}`;
+  }
+
+  refreshAll();
+  setInterval(refreshAll, 5 * 60 * 1000);
+</script>
+</body>
+</html>
