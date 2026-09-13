@@ -1,0 +1,38 @@
+name: Actualizar indicadores de EE.UU.
+
+on:
+  schedule:
+    # Corre 3 veces al día (horario UTC): 09:00, 15:00 y 21:00
+    - cron: "0 9,15,21 * * *"
+  workflow_dispatch: {}
+  push:
+    branches: [main]
+    paths:
+      - "scripts/fetch_us_indicators.py"
+      - ".github/workflows/update-data.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Traer últimos valores de FRED
+        run: python3 scripts/fetch_us_indicators.py
+
+      - name: Commitear si hay cambios
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/us-indicators.json
+          git diff --quiet --cached || git commit -m "Actualizar indicadores de EE.UU. [automático]"
+          git push
